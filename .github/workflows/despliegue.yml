@@ -24,6 +24,12 @@ jobs:
 
       - name: Instalar SSHpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
+        
+        - name: Crear carpeta en el servidor
+        run: |  
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/${{ secrets.VPS_USER }}/workspace/prueba"
+
 
       - name: Copiar stack.yml al servidor
         run: |

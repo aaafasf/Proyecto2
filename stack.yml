@@ -15,10 +15,10 @@ services:
         - "traefik.http.routers.cuzco.entrypoints=websecure"
         - "traefik.http.routers.cuzco.tls.certresolver=myresolver"
 
-        # Puerto interno DEL CONTENEDOR (tu Flask usa 1001)
-        - "traefik.http.services.cuzco.loadbalancer.server.port=1001"
+        # Puerto INTERNO DEL CONTENEDOR (CAMBIADO A 1003)
+        - "traefik.http.services.cuzco.loadbalancer.server.port=1003"
 
-        # Red de traefik
+        # Red que usa Traefik
         - "traefik.docker.network=traefik-public"
 
 networks:
