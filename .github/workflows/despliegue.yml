@@ -18,6 +18,10 @@ jobs:
 
       - name: Construir imagen Docker
         run: docker build -t ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 .
+      - name: DEBUG - Verificar secrets
+        run: |
+          echo "VPS_USER=>>${{ secrets.VPS_USER }}<<"
+          echo "VPS_HOST=>>${{ secrets.VPS_HOST }}<<"
 
       - name: Push de la imagen
         run: docker push ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5
