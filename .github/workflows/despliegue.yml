@@ -22,14 +22,17 @@ jobs:
       - name: Push de la imagen
         run: docker push ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5
 
+      # ----------------------------
+      # 🚀 SECCIÓN CON ERRORES—CORREGIDA
+      # ----------------------------
+
       - name: Instalar SSHpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
-        
-        - name: Crear carpeta en el servidor
-        run: |  
+
+      - name: Crear carpeta en el servidor
+        run: |
           sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no \
           ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/${{ secrets.VPS_USER }}/workspace/prueba"
-
 
       - name: Copiar stack.yml al servidor
         run: |
