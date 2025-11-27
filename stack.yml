@@ -9,16 +9,10 @@ services:
       replicas: 1
       labels:
         - "traefik.enable=true"
-
-        # Dominio (tu segundo apellido)
         - "traefik.http.routers.cuzco.rule=Host(`cuzco.byronrm.com`)"
         - "traefik.http.routers.cuzco.entrypoints=websecure"
         - "traefik.http.routers.cuzco.tls.certresolver=myresolver"
-
-        # Puerto INTERNO DEL CONTENEDOR (CAMBIADO A 1003)
         - "traefik.http.services.cuzco.loadbalancer.server.port=1003"
-
-        # Red que usa Traefik
         - "traefik.docker.network=traefik-public"
 
 networks:

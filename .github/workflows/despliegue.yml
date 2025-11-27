@@ -18,6 +18,7 @@ jobs:
 
       - name: Construir imagen Docker
         run: docker build -t ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 .
+
       - name: DEBUG - Verificar secrets
         run: |
           echo "VPS_USER=>>${{ secrets.VPS_USER }}<<"
@@ -29,11 +30,16 @@ jobs:
       - name: Instalar SSHpass
         run: sudo apt-get update && sudo apt-get install -y sshpass
 
-      - name: Copiar stack.yml al servidor (al HOME directamente)
+      - name: Crear carpeta deploy1 si no existe
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "mkdir -p /home/${{ secrets.VPS_USER }}/deploy1"
+
+      - name: Copiar stack.yml al servidor (en deploy1)
         run: |
           sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no \
             stack.yml \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/stack.yml
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/deploy1/stack.yml
 
       - name: Ejecutar despliegue en el servidor
         run: |
@@ -41,5 +47,6 @@ jobs:
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
               docker login ghcr.io -u ${{ github.actor }} -p '${{ secrets.GHCR_PAT }}' &&
               docker pull ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 &&
-              docker stack deploy -c /home/${{ secrets.VPS_USER }}/stack.yml proyecto2 --with-registry-auth
+              docker stack deploy -c /home/${{ secrets.VPS_USER }}/deploy1/stack.yml proyecto2 --with-registry-auth
             "
+            
