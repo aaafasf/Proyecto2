@@ -8,33 +8,34 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Login en GHCR
-      run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Login en GHCR
+        run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Construir imagen Docker
-      run: docker build -t ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 .
+      - name: Construir imagen Docker
+        run: docker build -t ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 .
 
-    - name: Push de la imagen
-      run: docker push ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5
+      - name: Push de la imagen
+        run: docker push ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5
 
-    - name: Instalar SSHpass
-      run: sudo apt-get update && sudo apt-get install -y sshpass
+      - name: Instalar SSHpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
 
-    - name: Copiar stack.yml al servidor
-      run: |
-        sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no stack.yml \
-        ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/stack.yml
+      - name: Copiar stack.yml al servidor
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no \
+          stack.yml \
+          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/workspace/prueba/stack.yml
 
-    - name: Ejecutar despliegue en el servidor
-      run: |
-        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no \
-        ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
-          docker login ghcr.io -u ${{ github.actor }} -p '${{ secrets.GHCR_PAT }}' &&
-          docker pull ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 &&
-          docker stack deploy -c stack.yml proyecto2 --with-registry-auth
-        "
+      - name: Ejecutar despliegue en el servidor
+        run: |
+          sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no \
+          ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+            docker login ghcr.io -u ${{ github.actor }} -p '${{ secrets.GHCR_PAT }}' &&
+            docker pull ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 &&
+            docker stack deploy -c /home/${{ secrets.VPS_USER }}/workspace/prueba/stack.yml proyecto2 --with-registry-auth
+          "
