@@ -1,19 +1,17 @@
-# IMAGEN BASE Python 11 (usamos Python 3.11)
+# IMAGEN BASE Python 3.12
 FROM python:3.12-slim
 
 # Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar los archivos necesarios (app.py y requirements.txt)
-# Asegúrate de tener app.py y requirements.txt en el mismo directorio donde construyes la imagen
+# Copiar archivos del proyecto
 COPY . .
 
 # Instalar dependencias
-# --no-cache-dir para no guardar caché pip en la imagen
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Exponer el puerto (la app escucha en el puerto 80)
+# Exponer el puerto donde corre Flask
 EXPOSE 1001
 
-# Ejecutar la aplicación 
-CMD ["python","app.py"]
+# Comando para ejecutar la aplicación
+CMD ["python", "app.py"]

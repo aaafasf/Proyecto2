@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   app:
-    image: ghcr.io/aaafasf/steven1:3.0.0
+    image: ghcr.io/aaafasf/proyecto2:1.0.5
     networks:
       - traefik-public
     deploy:
@@ -10,15 +10,15 @@ services:
       labels:
         - "traefik.enable=true"
 
-        # Dominio
-        - "traefik.http.routers.steven.rule=Host(`steven.byronrm.com`)"
-        - "traefik.http.routers.steven.entrypoints=websecure"
-        - "traefik.http.routers.steven.tls.certresolver=myresolver"
+        # Dominio (tu segundo apellido)
+        - "traefik.http.routers.cuzco.rule=Host(`cuzco.byronrm.com`)"
+        - "traefik.http.routers.cuzco.entrypoints=websecure"
+        - "traefik.http.routers.cuzco.tls.certresolver=myresolver"
 
-        # Puerto interno
-        - "traefik.http.services.steven.loadbalancer.server.port=1001"
+        # Puerto interno DEL CONTENEDOR (tu Flask usa 1001)
+        - "traefik.http.services.cuzco.loadbalancer.server.port=1001"
 
-        # ESTA ETIQUETA ES LA QUE FALTABA 🔥
+        # Red de traefik
         - "traefik.docker.network=traefik-public"
 
 networks:

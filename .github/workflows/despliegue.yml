@@ -1,75 +1,36 @@
-name: Despliegue Python
+name: Despliegue Automático
 
 on:
   push:
-    branches: ["final"]
-
-permissions:
-  contents: read
-  packages: write
+    branches:
+      - cuzco
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.10"
+    - name: Login en GHCR
+      run: echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-    - name: Install dependencies
-      run: pip install -r requirements.txt
+    - name: Construir imagen Docker
+      run: docker build -t ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 .
 
-    - name: Login GHCR
-      uses: docker/login-action@v3
-      with:
-        registry: ghcr.io
-        username: aaafasf
-        password: ${{ secrets.GHCR_PAT }}
+    - name: Push de la imagen
+      run: docker push ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5
 
-    - name: Build & Push
-      uses: docker/build-push-action@v6
-      with:
-        push: true
-        tags: |
-          ghcr.io/aaafasf/steven1:3.0.0
-          ghcr.io/aaafasf/steven1:latest
+    - name: Instalar SSHpass
+      run: sudo apt-get update && sudo apt-get install -y sshpass
 
-    - name: Test SSH connection
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: ${{ secrets.VPS_SSH_PORT }}
-        script: echo "SSH OK"
+    - name: Copiar stack.yml al servidor
+      run: sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no stack.yml ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/stack.yml
 
-    - name: Copy stack.yml
-      uses: appleboy/scp-action@v1
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: ${{ secrets.VPS_SSH_PORT }}
-        source: "stack.yml"
-        target: "/home/${{ secrets.VPS_USER }}/deploy1"
-
-    - name: Deploy stack
-      uses: appleboy/ssh-action@v1
-      with:
-        host: ${{ secrets.VPS_HOST }}
-        username: ${{ secrets.VPS_USER }}
-        password: ${{ secrets.VPS_PASSWORD }}
-        port: ${{ secrets.VPS_SSH_PORT }}
-        script: |
-          cd ~/deploy1
-          echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u aaafasf --password-stdin
-          docker pull ghcr.io/aaafasf/steven1:3.0.0
-          docker stack rm steven || true
-          sleep 10
-          docker stack deploy --with-registry-auth -c stack.yml steven
-          docker service ls
+    - name: Ejecutar despliegue en el servidor
+      run: sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+        docker login ghcr.io -u ${{ github.actor }} -p '${{ secrets.GHCR_PAT }}' &&
+        docker pull ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 &&
+        docker stack deploy -c stack.yml proyecto2 --with-registry-auth
+      "
