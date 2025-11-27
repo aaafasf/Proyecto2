@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  app:
+    image: ghcr.io/aaafasf/steven1:3.0.0
+    networks:
+      - traefik-public
+    deploy:
+      replicas: 1
+      labels:
+        - "traefik.enable=true"
+
+        # Dominio
+        - "traefik.http.routers.steven.rule=Host(`steven.byronrm.com`)"
+        - "traefik.http.routers.steven.entrypoints=websecure"
+        - "traefik.http.routers.steven.tls.certresolver=myresolver"
+
+        # Puerto interno
+        - "traefik.http.services.steven.loadbalancer.server.port=1001"
+
+        # ESTA ETIQUETA ES LA QUE FALTABA 🔥
+        - "traefik.docker.network=traefik-public"
+
+networks:
+  traefik-public:
+    external: true
