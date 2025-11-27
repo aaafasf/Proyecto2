@@ -270,4 +270,4 @@ def support():
     return redirect(url_for("index") + "#support")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1001, debug=False)
+    app.run(host="0.0.0.0", port=1003, debug=False)
