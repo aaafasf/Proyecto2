@@ -26,11 +26,15 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y sshpass
 
     - name: Copiar stack.yml al servidor
-      run: sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no stack.yml ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/stack.yml
+      run: |
+        sshpass -p "${{ secrets.VPS_PASSWORD }}" scp -o StrictHostKeyChecking=no stack.yml \
+        ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/home/${{ secrets.VPS_USER }}/stack.yml
 
     - name: Ejecutar despliegue en el servidor
-      run: sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
-        docker login ghcr.io -u ${{ github.actor }} -p '${{ secrets.GHCR_PAT }}' &&
-        docker pull ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 &&
-        docker stack deploy -c stack.yml proyecto2 --with-registry-auth
-      "
+      run: |
+        sshpass -p "${{ secrets.VPS_PASSWORD }}" ssh -o StrictHostKeyChecking=no \
+        ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
+          docker login ghcr.io -u ${{ github.actor }} -p '${{ secrets.GHCR_PAT }}' &&
+          docker pull ghcr.io/${{ github.repository_owner }}/proyecto2:1.0.5 &&
+          docker stack deploy -c stack.yml proyecto2 --with-registry-auth
+        "
